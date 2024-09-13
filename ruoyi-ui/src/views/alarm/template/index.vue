@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="是否启用，1-是  2-否" prop="enable">
-        <el-select v-model="queryParams.enable" placeholder="请选择是否启用，1-是  2-否" clearable>
+      <el-form-item label="是否启用" prop="enable">
+        <el-select v-model="queryParams.enable" placeholder="请选择" clearable>
           <el-option
             v-for="dict in dict.type.sys_normal_disable"
             :key="dict.value"
@@ -11,8 +11,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="模板类型：1-slack 2-wechat 3-submail" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择模板类型：1-slack 2-wechat 3-submail" clearable>
+      <el-form-item label="模板类型" prop="type">
+        <el-select v-model="queryParams.type" placeholder="请选择模板类型" clearable>
           <el-option
             v-for="dict in dict.type.alarm_type"
             :key="dict.value"
@@ -20,14 +20,6 @@
             :value="dict.value"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item label="模板id" prop="templateId">
-        <el-input
-          v-model="queryParams.templateId"
-          placeholder="请输入模板id"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
       </el-form-item>
       <el-form-item label="任务名称" prop="name">
         <el-input
@@ -92,19 +84,18 @@
     <el-table v-loading="loading" :data="templateList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键id" align="center" prop="id" />
-      <el-table-column label="是否启用，1-是  2-否" align="center" prop="enable">
+      <el-table-column label="是否启用" align="center" prop="enable">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_normal_disable" :value="scope.row.enable"/>
         </template>
       </el-table-column>
-      <el-table-column label="模板类型：1-slack 2-wechat 3-submail" align="center" prop="type">
+      <el-table-column label="模板类型" align="center" prop="type">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.alarm_type" :value="scope.row.type"/>
         </template>
       </el-table-column>
       <el-table-column label="模板id" align="center" prop="templateId" />
       <el-table-column label="任务名称" align="center" prop="name" />
-      <el-table-column label="模板内容" align="center" prop="content" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -124,7 +115,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -136,7 +127,7 @@
     <!-- 添加或修改预警模板对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="是否启用，1-是  2-否" prop="enable">
+        <el-form-item label="是否启用" prop="enable">
           <el-radio-group v-model="form.enable">
             <el-radio
               v-for="dict in dict.type.sys_normal_disable"
@@ -145,8 +136,8 @@
             >{{dict.label}}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="模板类型：1-slack 2-wechat 3-submail" prop="type">
-          <el-select v-model="form.type" placeholder="请选择模板类型：1-slack 2-wechat 3-submail">
+        <el-form-item label="模板类型" prop="type">
+          <el-select v-model="form.type" placeholder="请选择模板类型：">
             <el-option
               v-for="dict in dict.type.alarm_type"
               :key="dict.value"
