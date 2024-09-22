@@ -6,36 +6,37 @@ import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
- * 预警模板对象 alarm_template
+ * 预警机器人对象 alarm_robot
  * 
  * @author ruoyi
  * @date 2024-09-22
  */
-public class AlarmTemplate extends BaseEntity
+public class AlarmRobot extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 主键id */
     private String id;
 
-    /** 是否启用 */
-    @Excel(name = "是否启用")
+    /** 是否启用，1-是  2-否 */
+    @Excel(name = "是否启用，1-是  2-否")
     private Long enable;
 
-    /** 模板类型 */
-    @Excel(name = "模板类型")
+    /** 模板类型：1-slack 2-wechat 3-submail */
+    @Excel(name = "模板类型：1-slack 2-wechat 3-submail")
     private Long type;
 
-    /** 模板id */
-    @Excel(name = "模板id")
-    private Long templateId;
+    /** 机器人id */
+    @Excel(name = "机器人id")
+    private String robotId;
 
-    /** 名称 */
-    @Excel(name = "名称")
+    /** 任务名称 */
+    @Excel(name = "任务名称")
     private String name;
 
     /** 模板内容 */
-    private String content;
+    @Excel(name = "模板内容")
+    private String hookUrl;
 
     public void setId(String id) 
     {
@@ -64,14 +65,14 @@ public class AlarmTemplate extends BaseEntity
     {
         return type;
     }
-    public void setTemplateId(Long templateId) 
+    public void setRobotId(String robotId) 
     {
-        this.templateId = templateId;
+        this.robotId = robotId;
     }
 
-    public Long getTemplateId() 
+    public String getRobotId() 
     {
-        return templateId;
+        return robotId;
     }
     public void setName(String name) 
     {
@@ -82,14 +83,14 @@ public class AlarmTemplate extends BaseEntity
     {
         return name;
     }
-    public void setContent(String content) 
+    public void setHookUrl(String hookUrl) 
     {
-        this.content = content;
+        this.hookUrl = hookUrl;
     }
 
-    public String getContent() 
+    public String getHookUrl() 
     {
-        return content;
+        return hookUrl;
     }
 
     @Override
@@ -100,9 +101,9 @@ public class AlarmTemplate extends BaseEntity
             .append("updateTime", getUpdateTime())
             .append("enable", getEnable())
             .append("type", getType())
-            .append("templateId", getTemplateId())
+            .append("robotId", getRobotId())
             .append("name", getName())
-            .append("content", getContent())
+            .append("hookUrl", getHookUrl())
             .toString();
     }
 }

@@ -7,7 +7,7 @@ import com.ruoyi.alarm.domain.AlarmTemplate;
  * 预警模板Mapper接口
  * 
  * @author ruoyi
- * @date 2024-09-11
+ * @date 2024-09-22
  */
 public interface AlarmTemplateMapper 
 {

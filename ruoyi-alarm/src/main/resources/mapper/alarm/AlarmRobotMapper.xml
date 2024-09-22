@@ -2,80 +2,81 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.alarm.mapper.AlarmTemplateMapper">
+<mapper namespace="com.ruoyi.alarm.mapper.AlarmRobotMapper">
     
-    <resultMap type="AlarmTemplate" id="AlarmTemplateResult">
+    <resultMap type="AlarmRobot" id="AlarmRobotResult">
         <result property="id"    column="id"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
         <result property="enable"    column="enable"    />
         <result property="type"    column="type"    />
-        <result property="templateId"    column="template_id"    />
+        <result property="robotId"    column="robot_id"    />
         <result property="name"    column="name"    />
-        <result property="content"    column="content"    />
+        <result property="hookUrl"    column="hook_url"    />
     </resultMap>
 
-    <sql id="selectAlarmTemplateVo">
-        select id, create_time, update_time, enable, type, template_id, name, content from alarm_template
+    <sql id="selectAlarmRobotVo">
+        select id, create_time, update_time, enable, type, robot_id, name, hook_url from alarm_robot
     </sql>
 
-    <select id="selectAlarmTemplateList" parameterType="AlarmTemplate" resultMap="AlarmTemplateResult">
-        <include refid="selectAlarmTemplateVo"/>
+    <select id="selectAlarmRobotList" parameterType="AlarmRobot" resultMap="AlarmRobotResult">
+        <include refid="selectAlarmRobotVo"/>
         <where>  
             <if test="enable != null "> and enable = #{enable}</if>
             <if test="type != null "> and type = #{type}</if>
-            <if test="templateId != null "> and template_id = #{templateId}</if>
+            <if test="robotId != null  and robotId != ''"> and robot_id = #{robotId}</if>
             <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="hookUrl != null  and hookUrl != ''"> and hook_url = #{hookUrl}</if>
         </where>
     </select>
     
-    <select id="selectAlarmTemplateById" parameterType="String" resultMap="AlarmTemplateResult">
-        <include refid="selectAlarmTemplateVo"/>
+    <select id="selectAlarmRobotById" parameterType="String" resultMap="AlarmRobotResult">
+        <include refid="selectAlarmRobotVo"/>
         where id = #{id}
     </select>
 
-    <insert id="insertAlarmTemplate" parameterType="AlarmTemplate" useGeneratedKeys="true" keyProperty="id">
-        insert into alarm_template
+    <insert id="insertAlarmRobot" parameterType="AlarmRobot" useGeneratedKeys="true" keyProperty="id">
+        insert into alarm_robot
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
             <if test="enable != null">enable,</if>
             <if test="type != null">type,</if>
-            <if test="templateId != null">template_id,</if>
+            <if test="robotId != null and robotId != ''">robot_id,</if>
             <if test="name != null and name != ''">name,</if>
-            <if test="content != null and content != ''">content,</if>
+            <if test="hookUrl != null and hookUrl != ''">hook_url,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
             <if test="enable != null">#{enable},</if>
             <if test="type != null">#{type},</if>
-            <if test="templateId != null">#{templateId},</if>
+            <if test="robotId != null and robotId != ''">#{robotId},</if>
             <if test="name != null and name != ''">#{name},</if>
-            <if test="content != null and content != ''">#{content},</if>
+            <if test="hookUrl != null and hookUrl != ''">#{hookUrl},</if>
          </trim>
     </insert>
 
-    <update id="updateAlarmTemplate" parameterType="AlarmTemplate">
-        update alarm_template
+    <update id="updateAlarmRobot" parameterType="AlarmRobot">
+        update alarm_robot
         <trim prefix="SET" suffixOverrides=",">
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="enable != null">enable = #{enable},</if>
             <if test="type != null">type = #{type},</if>
-            <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="robotId != null and robotId != ''">robot_id = #{robotId},</if>
             <if test="name != null and name != ''">name = #{name},</if>
-            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="hookUrl != null and hookUrl != ''">hook_url = #{hookUrl},</if>
         </trim>
         where id = #{id}
     </update>
 
-    <delete id="deleteAlarmTemplateById" parameterType="String">
-        delete from alarm_template where id = #{id}
+    <delete id="deleteAlarmRobotById" parameterType="String">
+        delete from alarm_robot where id = #{id}
     </delete>
 
-    <delete id="deleteAlarmTemplateByIds" parameterType="String">
-        delete from alarm_template where id in 
+    <delete id="deleteAlarmRobotByIds" parameterType="String">
+        delete from alarm_robot where id in 
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>

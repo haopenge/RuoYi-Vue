@@ -12,7 +12,7 @@ import com.ruoyi.alarm.service.IAlarmTemplateService;
  * 预警模板Service业务层处理
  * 
  * @author ruoyi
- * @date 2024-09-11
+ * @date 2024-09-22
  */
 @Service
 public class AlarmTemplateServiceImpl implements IAlarmTemplateService 

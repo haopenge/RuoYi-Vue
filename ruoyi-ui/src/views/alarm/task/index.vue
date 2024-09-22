@@ -1,34 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="是否启用" prop="enable">
-        <el-select v-model="queryParams.enable" placeholder="请选择是否启用" clearable>
-          <el-option
-            v-for="dict in dict.type.sys_normal_disable"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="模板类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择模板类型" clearable>
-          <el-option
-            v-for="dict in dict.type.alarm_type"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="模板id" prop="templateId">
-        <el-input
-          v-model="queryParams.templateId"
-          placeholder="请输入模板id"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -36,6 +8,36 @@
           clearable
           @keyup.enter.native="handleQuery"
         />
+      </el-form-item>
+      <el-form-item label="appId" prop="appId">
+        <el-select v-model="queryParams.appId" placeholder="请选择appId" clearable>
+          <el-option
+            v-for="dict in dict.type.alarm_app_id"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="级别" prop="level">
+        <el-select v-model="queryParams.level" placeholder="请选择级别" clearable>
+          <el-option
+            v-for="dict in dict.type.alarm_task_level"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="类型" prop="type">
+        <el-select v-model="queryParams.type" placeholder="请选择类型" clearable>
+          <el-option
+            v-for="dict in dict.type.alarm_task_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -51,7 +53,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['alarm:template:add']"
+          v-hasPermi="['alarm:task:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -62,7 +64,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['alarm:template:edit']"
+          v-hasPermi="['alarm:task:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -73,7 +75,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['alarm:template:remove']"
+          v-hasPermi="['alarm:task:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -83,27 +85,39 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['alarm:template:export']"
+          v-hasPermi="['alarm:task:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="templateList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键id" align="center" prop="id" />
-      <el-table-column label="是否启用" align="center" prop="enable">
+      <el-table-column label="启用" align="center" prop="enable">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_normal_disable" :value="scope.row.enable"/>
         </template>
       </el-table-column>
-      <el-table-column label="模板类型" align="center" prop="type">
+      <el-table-column label="名称" align="center" prop="name" />
+      <el-table-column label="幂等id" align="center" prop="idempotentValue" />
+      <el-table-column label="最小间隔" align="center" prop="notifyMinInterval" />
+      <el-table-column label="appId" align="center" prop="appId">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.alarm_type" :value="scope.row.type"/>
+          <dict-tag :options="dict.type.alarm_app_id" :value="scope.row.appId"/>
         </template>
       </el-table-column>
-      <el-table-column label="模板id" align="center" prop="templateId" />
-      <el-table-column label="名称" align="center" prop="name" />
+      <el-table-column label="通知用户" align="center" prop="notifyUserIds" />
+      <el-table-column label="级别" align="center" prop="level">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.alarm_task_level" :value="scope.row.level"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="类型" align="center" prop="type">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.alarm_task_type" :value="scope.row.type"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -111,19 +125,19 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['alarm:template:edit']"
+            v-hasPermi="['alarm:task:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['alarm:template:remove']"
+            v-hasPermi="['alarm:task:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -132,36 +146,53 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改预警模板对话框 -->
+    <!-- 添加或修改预警任务对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="是否启用" prop="enable">
-          <el-radio-group v-model="form.enable">
-            <el-radio
-              v-for="dict in dict.type.sys_normal_disable"
-              :key="dict.value"
-              :label="parseInt(dict.value)"
-            >{{dict.label}}</el-radio>
-          </el-radio-group>
+        <el-form-item label="启用" prop="enable">
+          <el-input v-model="form.enable" placeholder="请输入是否启用，1-是  2-否" />
         </el-form-item>
-        <el-form-item label="模板类型" prop="type">
-          <el-select v-model="form.type" placeholder="请选择模板类型">
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入名称" />
+        </el-form-item>
+        <el-form-item label="幂等id" prop="idempotentValue">
+          <el-input v-model="form.idempotentValue" placeholder="请输入幂等id" />
+        </el-form-item>
+        <el-form-item label="最小间隔" prop="notifyMinInterval">
+          <el-input v-model="form.notifyMinInterval" placeholder="请输入最小间隔" />
+        </el-form-item>
+        <el-form-item label="appId" prop="appId">
+          <el-select v-model="form.appId" placeholder="请选择appId">
             <el-option
-              v-for="dict in dict.type.alarm_type"
+              v-for="dict in dict.type.alarm_app_id"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="通知用户" prop="notifyUserIds">
+          <el-input v-model="form.notifyUserIds" placeholder="请输入通知用户" />
+        </el-form-item>
+        <el-form-item label="级别" prop="level">
+          <el-select v-model="form.level" placeholder="请选择级别">
+            <el-option
+              v-for="dict in dict.type.alarm_task_level"
               :key="dict.value"
               :label="dict.label"
               :value="parseInt(dict.value)"
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="模板id" prop="templateId">
-          <el-input v-model="form.templateId" placeholder="请输入模板id" />
-        </el-form-item>
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入名称" />
-        </el-form-item>
-        <el-form-item label="模板内容">
-          <editor v-model="form.content" :min-height="192"/>
+        <el-form-item label="类型" prop="type">
+          <el-select v-model="form.type" placeholder="请选择类型">
+            <el-option
+              v-for="dict in dict.type.alarm_task_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="parseInt(dict.value)"
+            ></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -173,11 +204,11 @@
 </template>
 
 <script>
-import { listTemplate, getTemplate, delTemplate, addTemplate, updateTemplate } from "@/api/alarm/template";
+import { listTask, getTask, delTask, addTask, updateTask } from "@/api/alarm/task";
 
 export default {
-  name: "Template",
-  dicts: ['sys_normal_disable', 'alarm_type'],
+  name: "Task",
+  dicts: ['alarm_task_type', 'alarm_task_level', 'alarm_app_id'],
   data() {
     return {
       // 遮罩层
@@ -192,8 +223,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 预警模板表格数据
-      templateList: [],
+      // 预警任务表格数据
+      taskList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -203,9 +234,10 @@ export default {
         pageNum: 1,
         pageSize: 10,
         enable: null,
-        type: null,
-        templateId: null,
         name: null,
+        appId: null,
+        level: null,
+        type: null
       },
       // 表单参数
       form: {},
@@ -218,19 +250,28 @@ export default {
           { required: true, message: "更新时间不能为空", trigger: "blur" }
         ],
         enable: [
-          { required: true, message: "是否启用不能为空", trigger: "change" }
-        ],
-        type: [
-          { required: true, message: "模板类型不能为空", trigger: "change" }
-        ],
-        templateId: [
-          { required: true, message: "模板id不能为空", trigger: "blur" }
+          { required: true, message: "是否启用，1-是  2-否不能为空", trigger: "blur" }
         ],
         name: [
           { required: true, message: "名称不能为空", trigger: "blur" }
         ],
-        content: [
-          { required: true, message: "模板内容不能为空", trigger: "blur" }
+        idempotentValue: [
+          { required: true, message: "幂等id不能为空", trigger: "blur" }
+        ],
+        notifyMinInterval: [
+          { required: true, message: "最小间隔不能为空", trigger: "blur" }
+        ],
+        appId: [
+          { required: true, message: "appId不能为空", trigger: "change" }
+        ],
+        notifyUserIds: [
+          { required: true, message: "通知用户不能为空", trigger: "blur" }
+        ],
+        level: [
+          { required: true, message: "级别不能为空", trigger: "change" }
+        ],
+        type: [
+          { required: true, message: "类型不能为空", trigger: "change" }
         ]
       }
     };
@@ -239,11 +280,11 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询预警模板列表 */
+    /** 查询预警任务列表 */
     getList() {
       this.loading = true;
-      listTemplate(this.queryParams).then(response => {
-        this.templateList = response.rows;
+      listTask(this.queryParams).then(response => {
+        this.taskList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
@@ -260,10 +301,13 @@ export default {
         createTime: null,
         updateTime: null,
         enable: null,
-        type: null,
-        templateId: null,
         name: null,
-        content: null
+        idempotentValue: null,
+        notifyMinInterval: null,
+        appId: null,
+        notifyUserIds: null,
+        level: null,
+        type: null
       };
       this.resetForm("form");
     },
@@ -287,16 +331,16 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加预警模板";
+      this.title = "添加预警任务";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
       const id = row.id || this.ids
-      getTemplate(id).then(response => {
+      getTask(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改预警模板";
+        this.title = "修改预警任务";
       });
     },
     /** 提交按钮 */
@@ -304,13 +348,13 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.id != null) {
-            updateTemplate(this.form).then(response => {
+            updateTask(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addTemplate(this.form).then(response => {
+            addTask(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -322,8 +366,8 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除预警模板编号为"' + ids + '"的数据项？').then(function() {
-        return delTemplate(ids);
+      this.$modal.confirm('是否确认删除预警任务编号为"' + ids + '"的数据项？').then(function() {
+        return delTask(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
@@ -331,9 +375,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('alarm/template/export', {
+      this.download('alarm/task/export', {
         ...this.queryParams
-      }, `template_${new Date().getTime()}.xlsx`)
+      }, `task_${new Date().getTime()}.xlsx`)
     }
   }
 };

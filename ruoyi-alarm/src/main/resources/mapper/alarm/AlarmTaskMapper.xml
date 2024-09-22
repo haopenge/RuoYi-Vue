@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.alarm.mapper.AlarmTaskMapper">
+    
+    <resultMap type="AlarmTask" id="AlarmTaskResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="enable"    column="enable"    />
+        <result property="name"    column="name"    />
+        <result property="idempotentValue"    column="idempotent_value"    />
+        <result property="notifyMinInterval"    column="notify_min_interval"    />
+        <result property="appId"    column="app_id"    />
+        <result property="notifyUserIds"    column="notify_user_ids"    />
+        <result property="level"    column="level"    />
+        <result property="type"    column="type"    />
+    </resultMap>
+
+    <sql id="selectAlarmTaskVo">
+        select id, create_time, update_time, enable, name, idempotent_value, notify_min_interval, app_id, notify_user_ids, level, type from alarm_task
+    </sql>
+
+    <select id="selectAlarmTaskList" parameterType="AlarmTask" resultMap="AlarmTaskResult">
+        <include refid="selectAlarmTaskVo"/>
+        <where>  
+            <if test="enable != null "> and enable = #{enable}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="appId != null  and appId != ''"> and app_id = #{appId}</if>
+            <if test="level != null "> and level = #{level}</if>
+            <if test="type != null "> and type = #{type}</if>
+        </where>
+    </select>
+    
+    <select id="selectAlarmTaskById" parameterType="String" resultMap="AlarmTaskResult">
+        <include refid="selectAlarmTaskVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAlarmTask" parameterType="AlarmTask" useGeneratedKeys="true" keyProperty="id">
+        insert into alarm_task
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="enable != null">enable,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="idempotentValue != null and idempotentValue != ''">idempotent_value,</if>
+            <if test="notifyMinInterval != null">notify_min_interval,</if>
+            <if test="appId != null and appId != ''">app_id,</if>
+            <if test="notifyUserIds != null and notifyUserIds != ''">notify_user_ids,</if>
+            <if test="level != null">level,</if>
+            <if test="type != null">type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="enable != null">#{enable},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="idempotentValue != null and idempotentValue != ''">#{idempotentValue},</if>
+            <if test="notifyMinInterval != null">#{notifyMinInterval},</if>
+            <if test="appId != null and appId != ''">#{appId},</if>
+            <if test="notifyUserIds != null and notifyUserIds != ''">#{notifyUserIds},</if>
+            <if test="level != null">#{level},</if>
+            <if test="type != null">#{type},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAlarmTask" parameterType="AlarmTask">
+        update alarm_task
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="enable != null">enable = #{enable},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="idempotentValue != null and idempotentValue != ''">idempotent_value = #{idempotentValue},</if>
+            <if test="notifyMinInterval != null">notify_min_interval = #{notifyMinInterval},</if>
+            <if test="appId != null and appId != ''">app_id = #{appId},</if>
+            <if test="notifyUserIds != null and notifyUserIds != ''">notify_user_ids = #{notifyUserIds},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="type != null">type = #{type},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAlarmTaskById" parameterType="String">
+        delete from alarm_task where id = #{id}
+    </delete>
+
+    <delete id="deleteAlarmTaskByIds" parameterType="String">
+        delete from alarm_task where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

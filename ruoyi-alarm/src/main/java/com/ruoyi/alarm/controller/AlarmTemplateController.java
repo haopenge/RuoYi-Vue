@@ -25,7 +25,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 预警模板Controller
  * 
  * @author ruoyi
- * @date 2024-09-11
+ * @date 2024-09-22
  */
 @RestController
 @RequestMapping("/alarm/template")

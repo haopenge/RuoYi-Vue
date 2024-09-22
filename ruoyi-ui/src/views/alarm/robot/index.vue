@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="是否启用" prop="enable">
+      <el-form-item label="启用" prop="enable">
         <el-select v-model="queryParams.enable" placeholder="请选择是否启用" clearable>
           <el-option
             v-for="dict in dict.type.sys_normal_disable"
@@ -11,20 +11,20 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="模板类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择模板类型" clearable>
+      <el-form-item label="类型" prop="type">
+        <el-select v-model="queryParams.type" placeholder="请选择模板类型：" clearable>
           <el-option
-            v-for="dict in dict.type.alarm_type"
+            v-for="dict in dict.type.alarm_webhook_type"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="模板id" prop="templateId">
+      <el-form-item label="机器人id" prop="robotId">
         <el-input
-          v-model="queryParams.templateId"
-          placeholder="请输入模板id"
+          v-model="queryParams.robotId"
+          placeholder="请输入机器人id"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -32,7 +32,7 @@
       <el-form-item label="名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入名称"
+          placeholder="请输入任务名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -51,7 +51,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['alarm:template:add']"
+          v-hasPermi="['alarm:robot:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -62,7 +62,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['alarm:template:edit']"
+          v-hasPermi="['alarm:robot:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -73,7 +73,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['alarm:template:remove']"
+          v-hasPermi="['alarm:robot:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -83,27 +83,28 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['alarm:template:export']"
+          v-hasPermi="['alarm:robot:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="templateList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="robotList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键id" align="center" prop="id" />
-      <el-table-column label="是否启用" align="center" prop="enable">
+      <el-table-column label="启用，" align="center" prop="enable">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_normal_disable" :value="scope.row.enable"/>
         </template>
       </el-table-column>
-      <el-table-column label="模板类型" align="center" prop="type">
+      <el-table-column label="类型" align="center" prop="type">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.alarm_type" :value="scope.row.type"/>
+          <dict-tag :options="dict.type.alarm_webhook_type" :value="scope.row.type"/>
         </template>
       </el-table-column>
-      <el-table-column label="模板id" align="center" prop="templateId" />
-      <el-table-column label="名称" align="center" prop="name" />
+      <el-table-column label="机器人id" align="center" prop="robotId" />
+      <el-table-column label="任务名称" align="center" prop="name" />
+      <el-table-column label="模板内容" align="center" prop="hookUrl" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -111,19 +112,19 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['alarm:template:edit']"
+            v-hasPermi="['alarm:robot:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['alarm:template:remove']"
+            v-hasPermi="['alarm:robot:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -132,10 +133,10 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改预警模板对话框 -->
+    <!-- 添加或修改预警机器人对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="是否启用" prop="enable">
+        <el-form-item label="启用" prop="enable">
           <el-radio-group v-model="form.enable">
             <el-radio
               v-for="dict in dict.type.sys_normal_disable"
@@ -144,24 +145,24 @@
             >{{dict.label}}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="模板类型" prop="type">
-          <el-select v-model="form.type" placeholder="请选择模板类型">
+        <el-form-item label="类型" prop="type">
+          <el-select v-model="form.type" placeholder="请选择模板类型：">
             <el-option
-              v-for="dict in dict.type.alarm_type"
+              v-for="dict in dict.type.alarm_webhook_type"
               :key="dict.value"
               :label="dict.label"
               :value="parseInt(dict.value)"
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="模板id" prop="templateId">
-          <el-input v-model="form.templateId" placeholder="请输入模板id" />
+        <el-form-item label="机器人id" prop="robotId">
+          <el-input v-model="form.robotId" placeholder="请输入机器人id" />
         </el-form-item>
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入名称" />
+        <el-form-item label="任务名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入任务名称" />
         </el-form-item>
-        <el-form-item label="模板内容">
-          <editor v-model="form.content" :min-height="192"/>
+        <el-form-item label="模板内容" prop="hookUrl">
+          <el-input v-model="form.hookUrl" placeholder="请输入模板内容" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -173,11 +174,11 @@
 </template>
 
 <script>
-import { listTemplate, getTemplate, delTemplate, addTemplate, updateTemplate } from "@/api/alarm/template";
+import { listRobot, getRobot, delRobot, addRobot, updateRobot } from "@/api/alarm/robot";
 
 export default {
-  name: "Template",
-  dicts: ['sys_normal_disable', 'alarm_type'],
+  name: "Robot",
+  dicts: ['sys_normal_disable', 'alarm_webhook_type'],
   data() {
     return {
       // 遮罩层
@@ -192,8 +193,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 预警模板表格数据
-      templateList: [],
+      // 预警机器人表格数据
+      robotList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -204,8 +205,9 @@ export default {
         pageSize: 10,
         enable: null,
         type: null,
-        templateId: null,
+        robotId: null,
         name: null,
+        hookUrl: null
       },
       // 表单参数
       form: {},
@@ -218,18 +220,18 @@ export default {
           { required: true, message: "更新时间不能为空", trigger: "blur" }
         ],
         enable: [
-          { required: true, message: "是否启用不能为空", trigger: "change" }
+          { required: true, message: "启用，1-是  2-否不能为空", trigger: "change" }
         ],
         type: [
-          { required: true, message: "模板类型不能为空", trigger: "change" }
+          { required: true, message: "类型1-slack 2-wechat 3-submail不能为空", trigger: "change" }
         ],
-        templateId: [
-          { required: true, message: "模板id不能为空", trigger: "blur" }
+        robotId: [
+          { required: true, message: "机器人id不能为空", trigger: "blur" }
         ],
         name: [
-          { required: true, message: "名称不能为空", trigger: "blur" }
+          { required: true, message: "任务名称不能为空", trigger: "blur" }
         ],
-        content: [
+        hookUrl: [
           { required: true, message: "模板内容不能为空", trigger: "blur" }
         ]
       }
@@ -239,11 +241,11 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询预警模板列表 */
+    /** 查询预警机器人列表 */
     getList() {
       this.loading = true;
-      listTemplate(this.queryParams).then(response => {
-        this.templateList = response.rows;
+      listRobot(this.queryParams).then(response => {
+        this.robotList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
@@ -261,9 +263,9 @@ export default {
         updateTime: null,
         enable: null,
         type: null,
-        templateId: null,
+        robotId: null,
         name: null,
-        content: null
+        hookUrl: null
       };
       this.resetForm("form");
     },
@@ -287,16 +289,16 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加预警模板";
+      this.title = "添加预警机器人";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
       const id = row.id || this.ids
-      getTemplate(id).then(response => {
+      getRobot(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改预警模板";
+        this.title = "修改预警机器人";
       });
     },
     /** 提交按钮 */
@@ -304,13 +306,13 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.id != null) {
-            updateTemplate(this.form).then(response => {
+            updateRobot(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addTemplate(this.form).then(response => {
+            addRobot(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -322,8 +324,8 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除预警模板编号为"' + ids + '"的数据项？').then(function() {
-        return delTemplate(ids);
+      this.$modal.confirm('是否确认删除预警机器人编号为"' + ids + '"的数据项？').then(function() {
+        return delRobot(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
@@ -331,9 +333,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('alarm/template/export', {
+      this.download('alarm/robot/export', {
         ...this.queryParams
-      }, `template_${new Date().getTime()}.xlsx`)
+      }, `robot_${new Date().getTime()}.xlsx`)
     }
   }
 };
